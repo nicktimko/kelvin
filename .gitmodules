@@ -1,0 +1,6 @@
+[submodule "extlibs/Adafruit_CircuitPython_BusDevice"]
+	path = remote/extlibs/Adafruit_CircuitPython_BusDevice
+	url = https://github.com/adafruit/Adafruit_CircuitPython_BusDevice.git
+[submodule "extlibs/Adafruit_CircuitPython_RFM9x"]
+	path = remote/extlibs/Adafruit_CircuitPython_RFM9x
+	url = https://github.com/adafruit/Adafruit_CircuitPython_RFM9x.git
