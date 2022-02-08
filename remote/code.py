@@ -26,32 +26,10 @@ dot = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.25)
 #     button.pull = Pull.UP
 #     buttons.append(button)
 
-battery_in = AnalogIn(board.D9)  # behind 50/50 divider
+battery_in = AnalogIn(board.D9)
 
-######################### HELPERS ##############################
-
-# Helper to convert analog input to voltage
 def getVoltage(pin):
     return (pin.value * 3.3) / 65536
-
-# Helper to give us a nice color swirl
-def wheel(pos):
-    # Input a value 0 to 255 to get a color value.
-    # The colours are a transition r - g - b - back to r.
-    if (pos < 0):
-        return [0, 0, 0]
-    if (pos > 255):
-        return [0, 0, 0]
-    if (pos < 85):
-        return [int(pos * 3), int(255 - (pos*3)), 0]
-    elif (pos < 170):
-        pos -= 85
-        return [int(255 - pos*3), 0, int(pos*3)]
-    else:
-        pos -= 170
-        return [0, int(pos*3), int(255 - pos*3)]
-
-######################### MAIN LOOP ##############################
 
 max_voltage = 4.2
 min_voltage = 3.5
@@ -64,14 +42,13 @@ steps = 64
 
 i = 0
 while True:
-  # spin internal LED around! autoshow is on
-#   dot[0] = wheel(i & 255)
+    vbat = getVoltage(battery_in) * 2  # vbat is behind 50/50 divider
+    vbat *= 4.017/3.95  # rough calibration from multimeter measurements
 
-#   i = (i+1) % 256  # run from 0 to 255
-#   time.sleep(0.01) # make bigger to slow down
-    vbat = getVoltage(battery_in) * 2
     soc = lipo_voltage_to_soc(vbat) / 100
     # soc = 0.5
+
+    print("Vbat: {:3.2f}, SOC: {:2.0f}%".format(vbat, 100*soc))
 
     hue = soc * 0.666  # soc = 1 --> blue, soc = 0 --> red
 
