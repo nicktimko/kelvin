@@ -3,36 +3,28 @@ from . import net, util, commands
 
 # grill data response
 INFO_RESPONSE = [
-    ("2x", "?"), # "UR"
-    ("h", "grill_temp"), # 2-3
-    ("h", "probe1_temp"), # 4-5
+    ("2x", "?"), # always "UR"
+    ("h", "grill_temp"),   # 2-3
+    ("h", "probe1_temp"),  # 4-5
     ("h", "grill_target"), # 6-7
-    ("x", "?"), # 8
-    ("x", "?"), # 9
-    ("x", "?"), # 10
-    ("x", "?"), # 11
-    ("x", "?"), # 12
-    ("x", "?"), # 13
-    ("x", "?"), # 14
-    ("x", "?"), # 15
+    ("8c", "_UC_data"), # 8-15  The "UC" command seems to send 8 bytes, and the reply always matches this
     ("h", "probe2_temp"),
-    ("x", "?"),
-    ("x", "?"),
-    ("b", "curve_remain_time"),
-    ("x", "?"),
-    ("x", "?"),
-    ("x", "?"),
-    ("b", "warn_code"),
-    ("x", "?"),
-    ("x", "?"),
-    ("x", "?"),
+    ("h", "probe2_target"),
+    ("B", "curve_remain_time"),
+    ("B", "_21"),
+    ("B", "_22"),
+    ("B", "_23"),
+    ("B", "warn_code"),
+    ("B", "_25"),
+    ("B", "_26"),
+    ("B", "_27"),
     ("h", "probe1_target"),
-    ("b", "grill_state"), # 30
-    ("b", "grill_mode"),
-    ("b", "fire_state"),
-    ("b", "fire_state_pct"),
-    ("x", "?"),
-    ("x", "?"),
+    ("B", "grill_state"), # 30
+    ("B", "grill_mode"),
+    ("B", "fire_state"),
+    ("B", "fire_state_pct"),
+    ("B", "_34"),
+    ("B", "_35"),
 ]
 
 

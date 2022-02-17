@@ -3,15 +3,24 @@ ID = b"UL!"
 FIRMWARE = b"UN!"
 POWER_ON = b"UK001!"
 POWER_OFF = b"UK004!"
+CLIMATE = b"UC..."  # tbd.
 
 
 def set_grill_temp(temp_f) -> bytes:
-    if not (150 <= temp_f <= 600):
+    if not (150 <= temp_f <= 550):
         raise ValueError("invalid temperature")
     return "UT{03d}!".format(temp_f).encode("ascii")
 
 
-def set_probe_temp(temp_f) -> bytes:
-    if not (32 <= temp_f <= 300):
+def set_probe_temp(temp_f, probe=1) -> bytes:
+    probe_char = {
+        1: "F",
+        2: "f",
+    }[probe]
+    if not (100 <= temp_f <= 250):
         raise ValueError("invalid temperature")
-    return "UF{03d}!".format(temp_f).encode("ascii")
+    return "U{1s}{03d}!".format(probe_char, temp_f).encode("ascii")
+
+
+def set_climate(payload):
+    CLIMATE = b"UC"

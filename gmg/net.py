@@ -3,6 +3,7 @@
 import base64
 import ipaddress
 import socket
+import select
 import subprocess
 import typing
 
@@ -65,12 +66,18 @@ def find_grills(cidr):
     return ips
 
 
-def send_message(message: bytes, ip: str, *, port: int = 8080):
+def send_message(message: bytes, ip: str, *, port: int = 8080, timeout: float = 1):
     address = (ip, port)
     with socket.socket(family=socket.AF_INET, type=socket.SOCK_DGRAM) as sock:
+        sock.setblocking(0)
         sock.connect(address)
         sock.send(message)
-        return sock.recv(128)
+
+        ready = select.select([sock], [], [], timeout)
+        if ready[0]:
+            return sock.recv(1024)
+
+        raise TimeoutError()
 
 
 def _main():

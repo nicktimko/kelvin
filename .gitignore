@@ -39,9 +39,6 @@ dist/
 # Flycheck
 flycheck_*.el
 
-# server auth directory
-/server/
-
 # projectiles files
 .projectile
 projectile-bookmarks.eld
@@ -359,3 +356,4 @@ config.patched.json
 *.vegeta-http
 
 Untitled*.ipynb
+*raw.pcap
