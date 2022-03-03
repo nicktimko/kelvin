@@ -1,30 +1,50 @@
 import board
-
-import colorsys
 import gc
 import time
-
-# from digitalio import DigitalInOut, Direction, Pull
 from analogio import AnalogIn
-# import touchio
+import busio
+import digitalio as dio
+gc.collect()
+import adafruit_rfm9x as rfm9x
+gc.collect()
 import neopixel
 
-gc.collect()   # make some rooooom
+dot = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.1)
 
-# One pixel connected internally!
-dot = neopixel.NeoPixel(board.NEOPIXEL, 1, brightness=0.25)
+FREQ = 915.0
 
-# Built in red LED
-# led = DigitalInOut(board.D13)
-# led.direction = Direction.OUTPUT
+reset = dio.DigitalInOut(board.D5)
+reset.direction = dio.Direction.OUTPUT
+reset.value = True
+cs = dio.DigitalInOut(board.D6)
+cs.direction = dio.Direction.OUTPUT
+cs.value = True  # active low
+# irq = dio.DigitalInOut(board.D10)
+# irq.direction = dio.Direction.INPUT
+spi = busio.SPI(board.SCK, MOSI=board.MOSI, MISO=board.MISO)
 
-# Digital input with pullup on D7, D9, and D10
-# buttons = []
-# for p in [board.D6, board.D9, board.D10]:
-#     button = DigitalInOut(p)
-#     button.direction = Direction.INPUT
-#     button.pull = Pull.UP
-#     buttons.append(button)
+def hv_to_rgb(h, v):
+    i = int(h*6.0) # XXX assume int() truncates!
+    f = (h*6.0) - i
+    q = v*(1.0 - f)
+    t = v*f
+    i = i%6
+    if i == 0:
+        return v, t, 0
+    if i == 1:
+        return q, v, 0
+    if i == 2:
+        return 0, v, t
+    if i == 3:
+        return 0, q, v
+    if i == 4:
+        return t, 0, v
+    if i == 5:
+        return v, 0, q
+
+gc.collect()
+
+radio = rfm9x.RFM9x(spi=spi, cs=cs, reset=reset, frequency=FREQ, baudrate=1_000_000)
 
 battery_in = AnalogIn(board.D9)
 
@@ -35,7 +55,6 @@ max_voltage = 4.2
 min_voltage = 3.5
 
 def lipo_voltage_to_soc(volts):
-    # https://electronics.stackexchange.com/a/551667
     return 123 - 123 / (1 + (volts/3.7)**80) ** 0.165
 
 steps = 64
@@ -47,14 +66,13 @@ while True:
 
     soc = lipo_voltage_to_soc(vbat) / 100
     # soc = 0.5
+    radio.send("vbat={:3.2f}".format(vbat).encode("ascii"))
 
     print("Vbat: {:3.2f}, SOC: {:2.0f}%".format(vbat, 100*soc))
 
     hue = soc * 0.666  # soc = 1 --> blue, soc = 0 --> red
-
     for value in ((steps - abs(x))/steps for x in range(-steps, steps+1)):
-        dot[0] = [int(255 * comp) for comp in colorsys.hsv_to_rgb(hue, 1, value)]
+        dot[0] = [int(255 * comp) for comp in hv_to_rgb(hue, value)]
         time.sleep(0.002)
-
     dot[0] = [0,0,0]
     time.sleep(4.9)
