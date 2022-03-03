@@ -5,13 +5,20 @@ import itertools
 import string
 import sys
 
+_print = builtins.print
+_format = builtins.format
+# del print
+# del format
+
 TEXTABLE = set(string.punctuation + string.ascii_letters + string.digits + " ")
 
 def generate(bs, cols=16, uppercase=False, group=2):
+    if isinstance(bs, str):
+        raise TypeError("bs should be a bytestring, not string")
     index = 0
-    linefmt = "{index:08x}: {hexed:{hexlen:}s}  {text:}"
-    ibs = iter(bs)
     hexlen = 2 * cols + (cols // group - 1)
+    linefmt = "{index:08x}: {hexed:<{hexlen:}s}  {text:}".replace("{hexlen:}", str(hexlen))
+    ibs = iter(bs)
     while True:
         line = bytes(itertools.islice(ibs, cols))
         iline = iter(line)
@@ -21,8 +28,8 @@ def generate(bs, cols=16, uppercase=False, group=2):
         if not uppercase:
             hexed = hexed.lower()
         text = "".join(c if c in TEXTABLE else "." for c in (chr(c) for c in line))
-        print(hexlen)
-        yield linefmt.format(index=index, hexlen=hexlen, hexed=hexed, text=text)
+        yield linefmt.format(index=index, hexed=hexed, text=text)
+        index += cols
 
 
 def format(bs, **kwargs):
@@ -30,7 +37,7 @@ def format(bs, **kwargs):
 
 
 def print(bs, **kwargs):
-    builtins.print(bs, **kwargs)
+    _print(format(bs, **kwargs))
 
 
 def _main():
@@ -41,15 +48,15 @@ def _main():
     parser.add_argument("input")
     args = parser.parse_args()
 
-    cols = args.cols or 16
-    group = args.group or 2
+    cols = 16
+    group = 2
 
     infile = args.input
     if infile == "-":
-        print(format(sys.stdin.buffer.read(), cols=cols, uppercase=args.uppercase, group=group))
+        print(sys.stdin.buffer.read(), cols=cols, uppercase=args.uppercase, group=group)
     else:
         with open(args.input, mode="rb") as f:
-            print(format(f.read(), cols=cols, uppercase=args.uppercase, group=group))
+            print(f.read(), cols=cols, uppercase=args.uppercase, group=group)
 
 
 if __name__ == "__main__":
