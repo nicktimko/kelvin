@@ -3,7 +3,7 @@ ID = b"UL!"
 FIRMWARE = b"UN!"
 POWER_ON = b"UK001!"
 POWER_OFF = b"UK004!"
-CLIMATE = b"UC..."  # tbd.
+CLIMATE = b"UC01234567"  # tbd.
 
 
 def set_grill_temp(temp_f) -> bytes:

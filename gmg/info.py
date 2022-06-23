@@ -7,7 +7,7 @@ INFO_RESPONSE = [
     ("h", "grill_temp"),   # 2-3
     ("h", "probe1_temp"),  # 4-5
     ("h", "grill_target"), # 6-7
-    ("8c", "_UC_data"), # 8-15  The "UC" command seems to send 8 bytes, and the reply always matches this
+    ("8s", "_UC_data"), # 8-15  The "UC" command seems to send 8 bytes, and the reply always matches this
     ("h", "probe2_temp"),
     ("h", "probe2_target"),
     ("B", "curve_remain_time"),
@@ -28,15 +28,21 @@ INFO_RESPONSE = [
 ]
 
 
+def get(ip):
+    reply = net.send_message(commands.INFO, ip)
+    if len(reply) != 36:
+        raise RuntimeError("mangled data", repr(reply))
+    data = util.specunpack(INFO_RESPONSE, reply, byte_order="<")
+    return data
+
+
 def _main():
     parser = argparse.ArgumentParser()
     parser.add_argument("grill_ip")
     args = parser.parse_args()
 
-    reply = net.send_message(commands.INFO, args.grill_ip)
-    info = util.specunpack(INFO_RESPONSE, reply, byte_order="<")
-
-    print(json.dumps(info, indent=2, sort_keys=True))
+    data = get(args.grill_ip)
+    print(json.dumps(data, indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
